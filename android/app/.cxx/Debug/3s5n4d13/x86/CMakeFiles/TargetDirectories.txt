@@ -1,0 +1,2 @@
+/Users/arunj/Documents/FlutterDemo/ak_foods/android/app/.cxx/Debug/3s5n4d13/x86/CMakeFiles/edit_cache.dir
+/Users/arunj/Documents/FlutterDemo/ak_foods/android/app/.cxx/Debug/3s5n4d13/x86/CMakeFiles/rebuild_cache.dir
