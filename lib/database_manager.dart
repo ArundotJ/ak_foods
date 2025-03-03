@@ -24,4 +24,8 @@ class DataBaseManager {
   Future<String> queryFromSQL(String query) async {
     return await mssqlConnection.getData(query);
   }
+
+  Future<String> updateQueryFromSQL(String query) async {
+    return await mssqlConnection.writeData(query);
+  }
 }

@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // ),
                   SizedBox(height: 20.0),
                   Text(
-                    'Welcome to Foodie',
+                    'AK FOODS',
                     style: TextStyle(
                       fontSize: 32.0,
                       color: Colors.white,
@@ -124,15 +124,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   SizedBox(height: 10.0),
-                  TextButton(
-                    onPressed: () {
-                      // Add your sign-up logic here
-                    },
-                    child: Text(
-                      'Don\'t have an account? Sign Up',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+                  // TextButton(
+                  //   onPressed: () {
+                  //     // Add your sign-up logic here
+                  //   },
+                  //   child: Text(
+                  //     'Don\'t have an account? Sign Up',
+                  //     style: TextStyle(color: Colors.white),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
