@@ -9,6 +9,7 @@ final class Product {
   int productId;
   double quantityDelivered;
   double totalAmount;
+  bool isUpdated = false;
 
   Product(
       this.productName,

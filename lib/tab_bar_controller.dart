@@ -1,5 +1,10 @@
 import 'package:ak_foods/home_screen.dart';
+import 'package:ak_foods/item_selection_popup.dart';
+import 'package:ak_foods/myStocks.dart';
+import 'package:ak_foods/payment_screen.dart';
+import 'package:ak_foods/receptDetailsScreen.dart';
 import 'package:ak_foods/user.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 
 class TabbarView extends StatefulWidget {
@@ -12,7 +17,6 @@ class TabbarView extends StatefulWidget {
 
 class _TabbarViewState extends State<TabbarView> {
   int _currentIndex = 0; // Index of the selected tab
-  late String userName;
 
   // List of screens for each tab
   List<Widget> _screens = [];
@@ -21,30 +25,19 @@ class _TabbarViewState extends State<TabbarView> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    userName = widget.userData.name;
     setState(() {
       _screens = [
         HomeScreen(
-          userName: userName,
+          user: widget.userData,
         ),
-        SearchScreen(),
-        BasketScreen(),
-        AccountScreen(name: userName)
+        MyStocksScreen(
+          user: widget.userData,
+        ),
+        PaymenyScreen(),
+        AccountScreen(name: widget.userData.name)
       ];
     });
   }
-
-  // void _loadUserData() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final result = prefs.getString(Constants.UserKey);
-  //   if (result != null) {
-  //     final data = jsonDecode(result);
-  //     User userData = User.fromJson(data[0]);
-  //     setState(() {
-  //       userName = userData.name;
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -66,12 +59,12 @@ class _TabbarViewState extends State<TabbarView> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
+            icon: Icon(Icons.shopping_basket),
+            label: 'Stocks',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_basket),
-            label: 'Basket',
+            icon: Icon(Icons.payment),
+            label: 'Payment',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -97,9 +90,15 @@ class SearchScreen extends StatelessWidget {
   }
 }
 
-class BasketScreen extends StatelessWidget {
+class BasketScreen extends StatefulWidget {
   const BasketScreen({super.key});
 
+  @override
+  _BasketScreenState createState() => _BasketScreenState();
+}
+
+class _BasketScreenState extends State<BasketScreen> {
+  String selectedItem = 'Select Item';
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -136,7 +135,10 @@ class AccountScreen extends StatelessWidget {
                 SizedBox(
                   height: 10,
                 ),
-                Text('Welcome $name'),
+                Text(
+                  '$name',
+                  textAlign: TextAlign.center,
+                ),
                 SizedBox(height: 16),
                 // Logout Button
                 ElevatedButton(

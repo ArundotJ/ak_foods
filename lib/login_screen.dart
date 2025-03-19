@@ -1,6 +1,7 @@
 import 'package:ak_foods/data_manager.dart';
 import 'package:ak_foods/tab_bar_controller.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert' show base64, utf8;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -92,8 +93,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: () async {
                               // Add your login logic here
                               DataManager manager = DataManager();
-                              final result =
-                                  await manager.login(userName, password);
+                              var encodedPWD = utf8.encode(password);
+                              final base64EncodedPWD =
+                                  base64.encode(encodedPWD);
+                              final result = await manager.login(
+                                  userName, base64EncodedPWD);
                               if (result != null) {
                                 Navigator.push(
                                   context,
