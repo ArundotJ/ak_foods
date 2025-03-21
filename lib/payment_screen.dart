@@ -214,6 +214,10 @@ class _PaymentScreenState extends State<PaymenyScreen> {
         });
       }
       print(value);
+    } else {
+      setState(() {
+        balanceAmount = "0.0";
+      });
     }
     final String trNumber = await DataBaseManager().queryFromSQL(
         "SELECT TOP 1 T_ID FROM CreditCustomerPayment ORDER BY T_ID DESC");

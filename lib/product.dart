@@ -7,9 +7,9 @@ final class Product {
   double rate;
   double quantityDamaged;
   int productId;
-  double quantityDelivered;
   double totalAmount;
   bool isUpdated = false;
+  double quantityDelivered = 0.0;
 
   Product(
       this.productName,
@@ -20,7 +20,6 @@ final class Product {
       this.rate,
       this.quantityDamaged,
       this.productId,
-      this.quantityDelivered,
       this.totalAmount);
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -33,7 +32,6 @@ final class Product {
         json['Rate'],
         json['QtyDamaged'],
         json['ProductID'],
-        json['QtyDelivered'],
         json['TotalAmount']);
   }
 }

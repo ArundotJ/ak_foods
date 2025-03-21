@@ -28,13 +28,13 @@ class _MyStocksScreenState extends State<MyStocksScreen> {
   void initState() {
     // TODO: implement initState
     _loadOpeningStockDetails();
-    loadCustomerData();
+    _loadCurrentStockDetails();
     super.initState();
   }
 
   void _loadOpeningStockDetails() async {
     final String data = await DataBaseManager().queryFromSQL(
-        "Select * from Voucher_OtherDetails1 inner join Voucher1 on Voucher1.Id = Voucher_OtherDetails1.VoucherID WHERE NAME = '${widget.user.name}}' AND Voucher1.Date = '${DateTime.now().getDateOnly()}'");
+        "Select * from Voucher_OtherDetails1 inner join Voucher1 on Voucher1.Id = Voucher_OtherDetails1.VoucherID WHERE NAME = '${widget.user.name.trim()}' AND Voucher1.Date = '${DateTime.now().getDateOnly()}'");
     final List result = jsonDecode(data);
     List<Product> dataList =
         result.map((value) => Product.fromJson(value)).toList();
@@ -43,14 +43,14 @@ class _MyStocksScreenState extends State<MyStocksScreen> {
     });
   }
 
-  void loadCustomerData() async {
-    final String data =
-        await DataBaseManager().queryFromSQL("Select * from customer");
+  void _loadCurrentStockDetails() async {
+    final String data = await DataBaseManager().queryFromSQL(
+        "Select * from Voucher_OtherDetails1 inner join Voucher1 on Voucher1.Id = Voucher_OtherDetails1.VoucherID WHERE NAME = '${widget.user.name.trim()}' AND Voucher1.Date = '${DateTime.now().getDateOnly()}'");
     final List result = jsonDecode(data);
-    List<Customer> dataList =
-        result.map((value) => Customer.fromJson(value)).toList();
+    List<Product> dataList =
+        result.map((value) => Product.fromJson(value)).toList();
     setState(() {
-      myCustomers = dataList;
+      currentStockItems = dataList;
     });
   }
 
@@ -277,6 +277,7 @@ class _MyStocksScreenState extends State<MyStocksScreen> {
       setState(() {
         isUpdateNeeded = false;
       });
+      _loadCurrentStockDetails();
     }
   }
 }
