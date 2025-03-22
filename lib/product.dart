@@ -10,6 +10,7 @@ final class Product {
   double totalAmount;
   bool isUpdated = false;
   double quantityDelivered = 0.0;
+  double actualQtyDelivered;
 
   Product(
       this.productName,
@@ -21,19 +22,22 @@ final class Product {
       this.quantityDamaged,
       this.productId,
       this.totalAmount,
-      this.quantityDelivered);
+      this.quantityDelivered,
+      this.actualQtyDelivered);
 
   factory Product.fromJson(Map<String, dynamic> json, bool isQDRemonte) {
     return Product(
-        json['ProductName'],
-        json['VoucherID'],
-        json['VD_ID'],
-        json['QtyTaken'],
-        json['QtyReturned'],
-        json['Rate'],
-        json['QtyDamaged'],
-        json['ProductID'],
-        json['TotalAmount'],
-        isQDRemonte ? json['QtyDelivered'] : 0.0);
+      json['ProductName'],
+      json['VoucherID'],
+      json['VD_ID'],
+      json['QtyTaken'],
+      json['QtyReturned'],
+      json['Rate'],
+      json['QtyDamaged'],
+      json['ProductID'],
+      json['TotalAmount'],
+      isQDRemonte ? json['QtyDelivered'] : 0.0,
+      json['QtyDelivered'],
+    );
   }
 }

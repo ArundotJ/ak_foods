@@ -447,18 +447,18 @@ class _HomeScreen extends State<HomeScreen> {
                           currentStockItems[index].productName,
                           style: TextStyle(fontSize: 16),
                         ),
-                        // Row(
-                        //   children: [
-                        //     Text(
-                        //       'QTY:',
-                        //       style: TextStyle(fontSize: 12),
-                        //     ),
-                        //     Text(
-                        //       '${(currentStockItems[index].quantityTaken - currentStockItems[index].quantityDamaged) - currentStockItems[index].quantityDelivered}',
-                        //       style: TextStyle(fontSize: 12),
-                        //     ),
-                        //   ],
-                        // )
+                        Row(
+                          children: [
+                            Text(
+                              'QTY:',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            Text(
+                              '${(currentStockItems[index].quantityTaken - currentStockItems[index].quantityDamaged) - currentStockItems[index].actualQtyDelivered}',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        )
                       ],
                     )),
                 SizedBox(
