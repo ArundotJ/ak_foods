@@ -591,7 +591,7 @@ class _HomeScreen extends State<HomeScreen> {
       print(invoices);
       if (selectedCustomer != null) {
         final String updateData = await DataBaseManager().updateQueryFromSQL(
-            "Insert into InvoiceInfo (Inv_ID, InvoiceNo, InvoiceDate, TaxType, Customer_ID, SalesmanID, SubTotal, CGST, SGST, IGST, GrandTotal,TotalPaid,Balance,Remarks,FreightCharges,OtherCharges,Total,RoundOff) VALUES ('$newInvoiceID','INV-$invoiceNumber','${DateTime.now().getDateOnly()}', 'Inclusive','${selectedCustomer!.id}', '','$totalValue','0','0','0','$totalValue','0','$totalValue','${widget.user.name}','0.0','0.0','$totalValue','0.00')");
+            "Insert into InvoiceInfo (Inv_ID, InvoiceNo, InvoiceDate, TaxType, Customer_ID, SalesmanID, SubTotal, CGST, SGST, IGST, GrandTotal,TotalPaid,Balance,Remarks,FreightCharges,OtherCharges,Total,RoundOff) VALUES ('$newInvoiceID','INV-$invoiceNumber','${DateTime.now().getDateOnly()}', 'Inclusive','${selectedCustomer!.id}', '','$totalValue','0','0','0','$totalValue','$amountPaid','$balanceAmount','${widget.user.name}','0.0','0.0','$totalValue','0.00')");
         for (var i = 0; i < currentStockItems.length; i++) {
           Product pro = currentStockItems[i];
           final String data = await DataBaseManager().updateQueryFromSQL(
@@ -606,7 +606,7 @@ class _HomeScreen extends State<HomeScreen> {
         }
         if (balanceAmount > 0.0) {
           final String invoicePayment = await DataBaseManager().updateQueryFromSQL(
-              "Insert into Invoice_Payment(InvoiceID,PaymentMode,TotalPaid,PaymentDate) VALUES ('$newInvoiceID','Credit Terms - 7 days','$totalValue','${DateTime.now().getDateOnly()}')");
+              "Insert into Invoice_Payment(InvoiceID,PaymentMode,TotalPaid,PaymentDate) VALUES ('$newInvoiceID','Credit Terms - 7 days','$balanceAmount','${DateTime.now().getDateOnly()}')");
         }
         if (selectedCustomer != null) {
           final String ledgerBook = await DataBaseManager().updateQueryFromSQL(
@@ -624,7 +624,7 @@ class _HomeScreen extends State<HomeScreen> {
                   "Insert into CustomerLedgerBook(Date, Name, LedgerNo, Label,Debit,Credit,PartyID) VALUES ('${DateTime.now().getDateOnly()}', '${selectedPaymentMode == "By Cash" ? "Cash Account" : "Bank Account"}','INV-$invoiceNumber','Payment','0.0','$amountPaid','${selectedCustomer!.customerID}')");
 
           final String invoicePayment = await DataBaseManager().updateQueryFromSQL(
-              "Insert into Invoice_Payment(InvoiceID,PaymentMode,TotalPaid,PaymentDate) VALUES ('$newInvoiceID','${selectedPaymentMode == "By Cash" ? "Cash Account" : "Bank Account"}','$amountPaid','${DateTime.now().getDateOnly()}')");
+              "Insert into Invoice_Payment(InvoiceID,PaymentMode,TotalPaid,PaymentDate) VALUES ('$newInvoiceID','${selectedPaymentMode == "By Cash" ? "By Cash" : "By Bank"}','$amountPaid','${DateTime.now().getDateOnly()}')");
         }
 
         Constants.showSaveSuccessAlert(context);
