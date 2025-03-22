@@ -20,9 +20,10 @@ final class Product {
       this.rate,
       this.quantityDamaged,
       this.productId,
-      this.totalAmount);
+      this.totalAmount,
+      this.quantityDelivered);
 
-  factory Product.fromJson(Map<String, dynamic> json) {
+  factory Product.fromJson(Map<String, dynamic> json, bool isQDRemonte) {
     return Product(
         json['ProductName'],
         json['VoucherID'],
@@ -32,6 +33,7 @@ final class Product {
         json['Rate'],
         json['QtyDamaged'],
         json['ProductID'],
-        json['TotalAmount']);
+        json['TotalAmount'],
+        isQDRemonte ? json['QtyDelivered'] : 0.0);
   }
 }

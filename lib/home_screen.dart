@@ -41,7 +41,7 @@ class _HomeScreen extends State<HomeScreen> {
 
   bool isUpdateNeeded = false;
   bool isCustomerSelectionDisabled = false;
-  bool isNetworkOnline = false;
+  bool isNetworkOnline = true;
   // Dummy data for sales
   final List<Map<String, dynamic>> salesItems = [
     {'name': 'Item 1', 'quantity': 5, 'returnQuantity': 1},
@@ -53,9 +53,10 @@ class _HomeScreen extends State<HomeScreen> {
   void initState() {
     super.initState();
     userName = widget.user.name;
+    loadCustomerData();
     _loadOpeningStockDetails();
     _loadCurrentStockDetails();
-    loadCustomerData();
+    setCurrentNetwork();
 
     final subscription = connectionChecker.onStatusChange.listen(
       (InternetConnectionStatus status) {
@@ -103,7 +104,7 @@ class _HomeScreen extends State<HomeScreen> {
         "Select * from Voucher_OtherDetails1 inner join Voucher1 on Voucher1.Id = Voucher_OtherDetails1.VoucherID WHERE NAME = '$userName' AND Voucher1.Date = '${DateTime.now().getDateOnly()}'");
     final List result = jsonDecode(data);
     List<Product> dataList =
-        result.map((value) => Product.fromJson(value)).toList();
+        result.map((value) => Product.fromJson(value, false)).toList();
     setState(() {
       openingStockItems = dataList;
     });
@@ -125,7 +126,7 @@ class _HomeScreen extends State<HomeScreen> {
         "Select * from Voucher_OtherDetails1 inner join Voucher1 on Voucher1.Id = Voucher_OtherDetails1.VoucherID WHERE NAME = '$userName' AND Voucher1.Date = '${DateTime.now().getDateOnly()}'");
     final List result = jsonDecode(data);
     List<Product> dataList =
-        result.map((value) => Product.fromJson(value)).toList();
+        result.map((value) => Product.fromJson(value, false)).toList();
     setState(() {
       currentStockItems = dataList;
     });
@@ -446,18 +447,18 @@ class _HomeScreen extends State<HomeScreen> {
                           currentStockItems[index].productName,
                           style: TextStyle(fontSize: 16),
                         ),
-                        Row(
-                          children: [
-                            Text(
-                              'QTY:',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                            Text(
-                              '${(currentStockItems[index].quantityTaken - currentStockItems[index].quantityDamaged) - currentStockItems[index].quantityDelivered}',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        )
+                        // Row(
+                        //   children: [
+                        //     Text(
+                        //       'QTY:',
+                        //       style: TextStyle(fontSize: 12),
+                        //     ),
+                        //     Text(
+                        //       '${(currentStockItems[index].quantityTaken - currentStockItems[index].quantityDamaged) - currentStockItems[index].quantityDelivered}',
+                        //       style: TextStyle(fontSize: 12),
+                        //     ),
+                        //   ],
+                        // )
                       ],
                     )),
                 SizedBox(

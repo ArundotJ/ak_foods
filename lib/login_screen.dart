@@ -1,7 +1,10 @@
+import 'package:ak_foods/constants.dart';
 import 'package:ak_foods/data_manager.dart';
 import 'package:ak_foods/tab_bar_controller.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert' show base64, utf8;
+
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,6 +16,35 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   String userName = "";
   String password = "";
+  bool isNetworkOnline = false;
+  final connectionChecker = InternetConnectionChecker.instance;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    setInitialNetworkState();
+    final subscription = connectionChecker.onStatusChange.listen(
+      (InternetConnectionStatus status) {
+        if (status == InternetConnectionStatus.connected) {
+          setState(() {
+            isNetworkOnline = true;
+          });
+        } else {
+          setState(() {
+            isNetworkOnline = false;
+          });
+        }
+      },
+    );
+  }
+
+  void setInitialNetworkState() async {
+    bool value = await connectionChecker.hasConnection;
+    setState(() {
+      isNetworkOnline = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,22 +124,29 @@ class _LoginScreenState extends State<LoginScreen> {
                           ElevatedButton(
                             onPressed: () async {
                               // Add your login logic here
-                              DataManager manager = DataManager();
-                              var encodedPWD = utf8.encode(password);
-                              final base64EncodedPWD =
-                                  base64.encode(encodedPWD);
-                              final result = await manager.login(
-                                  userName, base64EncodedPWD);
-                              if (result != null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => TabbarView(
-                                            userData: result,
-                                          )),
-                                );
+                              if (isNetworkOnline) {
+                                DataManager manager = DataManager();
+                                var encodedPWD = utf8.encode(password);
+                                final base64EncodedPWD =
+                                    base64.encode(encodedPWD);
+                                final result = await manager.login(
+                                    userName, base64EncodedPWD);
+                                if (result != null) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => TabbarView(
+                                              userData: result,
+                                            )),
+                                  );
+                                } else {
+                                  showAlertDialog(context);
+                                }
                               } else {
-                                showAlertDialog(context);
+                                Constants.showAlert(
+                                    "Alert",
+                                    "Please check the network connectivity to proceed!",
+                                    context);
                               }
                             },
                             style: ElevatedButton.styleFrom(

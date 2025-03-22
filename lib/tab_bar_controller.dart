@@ -6,6 +6,7 @@ import 'package:ak_foods/receptDetailsScreen.dart';
 import 'package:ak_foods/user.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 class TabbarView extends StatefulWidget {
   final User userData;
@@ -20,11 +21,14 @@ class _TabbarViewState extends State<TabbarView> {
 
   // List of screens for each tab
   List<Widget> _screens = [];
+  final connectionChecker = InternetConnectionChecker.instance;
+  bool isNetworkOnline = true;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    setInitialNetworkState();
     setState(() {
       _screens = [
         HomeScreen(
@@ -37,12 +41,35 @@ class _TabbarViewState extends State<TabbarView> {
         AccountScreen(name: widget.userData.name)
       ];
     });
+
+    final subscription = connectionChecker.onStatusChange.listen(
+      (InternetConnectionStatus status) {
+        if (status == InternetConnectionStatus.connected) {
+          setState(() {
+            isNetworkOnline = true;
+          });
+        } else {
+          setState(() {
+            isNetworkOnline = false;
+          });
+        }
+      },
+    );
+  }
+
+  void setInitialNetworkState() async {
+    bool value = await connectionChecker.hasConnection;
+    setState(() {
+      isNetworkOnline = value;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex], // Display the selected screen
+      body: isNetworkOnline == true
+          ? _screens[_currentIndex]
+          : NoInternetScreen(), // Display the selected screen
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -190,5 +217,58 @@ class AccountScreen extends StatelessWidget {
 
   void _logout(BuildContext context) {
     Navigator.pop(context);
+  }
+}
+
+class NoInternetScreen extends StatelessWidget {
+  // Function to simulate checking internet connection
+  Future<void> _checkInternetConnection(BuildContext context) async {
+    // Simulate a network call or connection check
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Image to represent no internet
+            Icon(Icons.wifi,
+                color: Colors.red), // Add your image to the assets folder
+            SizedBox(height: 20),
+            // Message
+            Text(
+              'No Internet Connection',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Please check your internet connection and try again.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 30),
+            // Retry button
+            ElevatedButton(
+              onPressed: () => _checkInternetConnection(context),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+              ),
+              child: Text(
+                'Retry',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
