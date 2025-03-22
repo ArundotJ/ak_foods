@@ -629,6 +629,7 @@ class _HomeScreen extends State<HomeScreen> {
 
         Constants.showSaveSuccessAlert(context);
         resetSelectedData();
+        _loadCurrentStockDetails();
       }
     } else {
       Constants.showAlert("Alert",
