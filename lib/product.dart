@@ -4,6 +4,7 @@ final class Product {
   int vd_id;
   double quantityTaken;
   double quantityReturn;
+  double defaultQuantityReturn = 0.0;
   double rate;
   double quantityDamaged;
   int productId;
@@ -39,5 +40,10 @@ final class Product {
       isQDRemonte ? json['QtyDelivered'] : 0.0,
       json['QtyDelivered'],
     );
+  }
+
+  double get currentQuantity {
+    return ((quantityTaken - quantityDamaged) - actualQtyDelivered) -
+        quantityReturn;
   }
 }

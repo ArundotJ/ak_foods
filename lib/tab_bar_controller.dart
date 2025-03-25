@@ -1,5 +1,6 @@
 import 'package:ak_foods/home_screen.dart';
 import 'package:ak_foods/item_selection_popup.dart';
+import 'package:ak_foods/myReports.dart';
 import 'package:ak_foods/myStocks.dart';
 import 'package:ak_foods/payment_screen.dart';
 import 'package:ak_foods/receptDetailsScreen.dart';
@@ -38,7 +39,9 @@ class _TabbarViewState extends State<TabbarView> {
           user: widget.userData,
         ),
         PaymenyScreen(),
-        AccountScreen(name: widget.userData.name)
+        AccountScreen(
+          user: widget.userData,
+        )
       ];
     });
 
@@ -138,9 +141,9 @@ class _BasketScreenState extends State<BasketScreen> {
 }
 
 class AccountScreen extends StatelessWidget {
-  final String name;
+  final User user;
 
-  const AccountScreen({super.key, required this.name});
+  const AccountScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +166,7 @@ class AccountScreen extends StatelessWidget {
                   height: 10,
                 ),
                 Text(
-                  '$name',
+                  '${user.name}',
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 16),
@@ -198,6 +201,10 @@ class AccountScreen extends StatelessWidget {
                 title: Text('Sales'),
                 onTap: () {
                   // Navigate to Sales screen
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MyReportsScreen(user: user)));
                 },
               ),
               Divider(),

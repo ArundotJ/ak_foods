@@ -34,6 +34,7 @@ class _HomeScreen extends State<HomeScreen> {
   double totalValue = 0.0;
   double amountPaid = 0.0;
   double balanceAmount = 0.0;
+  String? customerBalence = null;
   Customer? selectedCustomer = null;
   String selectedPaymentMode = "By Cash";
   String defaultTextForSelectCustomer = "Select Customer";
@@ -75,6 +76,28 @@ class _HomeScreen extends State<HomeScreen> {
     );
   }
 
+  void _fetchCutomerAccountDetails() async {
+    final String data = await DataBaseManager().queryFromSQL(
+        "Select isNULL(Sum(Credit),0)-IsNull(Sum(Debit),0) from CustomerLedgerBook WHERE PartyID = '${selectedCustomer!.customerID}' group By PartyID");
+    final List result = jsonDecode(data);
+    if (result.length > 0) {
+      double value = result[0][""];
+      if (value > 0) {
+        setState(() {
+          customerBalence = "${value.abs()} CR";
+        });
+      } else {
+        setState(() {
+          customerBalence = "${value.abs()} DR";
+        });
+      }
+    } else {
+      setState(() {
+        customerBalence = "0.0";
+      });
+    }
+  }
+
   void setCurrentNetwork() async {
     isNetworkOnline = await InternetConnectionChecker.instance.hasConnection;
   }
@@ -96,6 +119,7 @@ class _HomeScreen extends State<HomeScreen> {
       totalValue = 0.0;
       amountPaid = 0.0;
       balanceAmount = 0.0;
+      customerBalence = null;
     });
   }
 
@@ -190,6 +214,7 @@ class _HomeScreen extends State<HomeScreen> {
                   setState(() {
                     selectedCustomer =
                         myCustomers.firstWhere((p) => p.customerID == item.id);
+                    _fetchCutomerAccountDetails();
                   });
                 },
                 isDisabled: isCustomerSelectionDisabled,
@@ -261,6 +286,7 @@ class _HomeScreen extends State<HomeScreen> {
   Widget actualContent() {
     return Column(
       children: [
+        customerBalanceDetails(),
         SizedBox(height: 10),
         productHeading(),
         SizedBox(height: 10),
@@ -269,6 +295,17 @@ class _HomeScreen extends State<HomeScreen> {
         totalBalanceView(),
       ],
     );
+  }
+
+  Widget customerBalanceDetails() {
+    return customerBalence != null
+        ? Text(
+            'Balance: $customerBalence',
+            style: TextStyle(
+                fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
+            textAlign: TextAlign.start,
+          )
+        : Center();
   }
 
   Column totalBalanceView() {
@@ -454,7 +491,7 @@ class _HomeScreen extends State<HomeScreen> {
                               style: TextStyle(fontSize: 12),
                             ),
                             Text(
-                              '${(currentStockItems[index].quantityTaken - currentStockItems[index].quantityDamaged) - currentStockItems[index].actualQtyDelivered}',
+                              '${(currentStockItems[index].currentQuantity)}',
                               style: TextStyle(fontSize: 12),
                             ),
                           ],
@@ -507,7 +544,7 @@ class _HomeScreen extends State<HomeScreen> {
                       keyboardType: TextInputType.numberWithOptions(),
                       onChanged: (value) => setState(() {
                         if (value.isNotEmpty) {
-                          currentStockItems[index].quantityReturn =
+                          currentStockItems[index].defaultQuantityReturn =
                               double.parse(value);
                         }
                       }),
@@ -595,12 +632,12 @@ class _HomeScreen extends State<HomeScreen> {
         for (var i = 0; i < currentStockItems.length; i++) {
           Product pro = currentStockItems[i];
           final String data = await DataBaseManager().updateQueryFromSQL(
-              "Update Voucher_OtherDetails1 Set QtyDelivered = QtyDelivered + ${pro.quantityDelivered}, QtyReturned = QtyReturned + ${pro.quantityReturn} , TotalAmount = ${pro.totalAmount} Where ProductID= ${pro.productId} and VoucherID= ${pro.voicherID}");
+              "Update Voucher_OtherDetails1 Set QtyDelivered = QtyDelivered + ${pro.quantityDelivered}, QtyReturned = QtyReturned + ${pro.defaultQuantityReturn} , TotalAmount = ${pro.totalAmount} Where ProductID= ${pro.productId} and VoucherID= ${pro.voicherID}");
           final double quantity = (pro.quantityDelivered);
           final String invoiceProduct = await DataBaseManager().updateQueryFromSQL(
               "Insert into Invoice_Product(InvoiceID, ProductID, BatchNo,Qty, SalesRate, DiscountPer, Discount, CGSTPer, CGSTAmt, SGSTPer, SGSTAmt, IGSTPer, IGSTAmt,MfgDate,ExpiryDate, TotalAmount, PurchaseRate, Margin,MRP,Barcode,SubUnitQty) VALUES ('$newInvoiceID','${pro.productId}','First','$quantity','${pro.rate}','0','0','0','0','0','0','0','0','${DateTime.now().getDateOnly()}','${DateTime.now().getDateOnly()}','${quantity * pro.rate}', '${pro.rate}', '0', '${pro.rate}','0','$quantity')");
           final String vcDetails2 = await DataBaseManager().updateQueryFromSQL(
-              "Insert into Voucher_OtherDetails2(VoucherID,CustomerID,customerName,ProductID,ProductName,Rate,QtyDelivered,QtyReturned,NetQty,TotalAmount,SalesmanID,SalesmanName) VALUES ('${pro.voicherID}', '${selectedCustomer!.id}','${selectedCustomer!.name.trim()}','${pro.productId}','${pro.productName.trim()}', '${pro.rate}','${pro.quantityDelivered}','${pro.quantityReturn}','$quantity','${pro.rate * pro.quantityDelivered}','$newInvoiceID', '${widget.user.name.trim()}')");
+              "Insert into Voucher_OtherDetails2(VoucherID,CustomerID,customerName,ProductID,ProductName,Rate,QtyDelivered,QtyReturned,NetQty,TotalAmount,SalesmanID,SalesmanName) VALUES ('${pro.voicherID}', '${selectedCustomer!.id}','${selectedCustomer!.name.trim()}','${pro.productId}','${pro.productName.trim()}', '${pro.rate}','${pro.quantityDelivered}','${pro.defaultQuantityReturn}','$quantity','${pro.rate * pro.quantityDelivered}','$newInvoiceID', '${widget.user.name.trim()}')");
           final String tempStock = await DataBaseManager().updateQueryFromSQL(
               "Update Temp_stock set Qty = Qty - '$quantity', SubUnitQty = SubUnitQty - '$quantity' WHERE ProductID = '${pro.productId}'");
         }

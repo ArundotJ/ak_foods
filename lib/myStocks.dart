@@ -254,7 +254,7 @@ class _MyStocksScreenState extends State<MyStocksScreen> {
                           Expanded(
                             flex: 1,
                             child: Text(
-                              '${(currentStockItems[index].quantityTaken - currentStockItems[index].quantityDamaged) - currentStockItems[index].quantityDelivered}',
+                              '${currentStockItems[index].currentQuantity}',
                               textAlign: TextAlign.end,
                               style: TextStyle(fontSize: 16),
                             ),
