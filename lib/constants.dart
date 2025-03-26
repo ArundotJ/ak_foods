@@ -16,7 +16,7 @@ class Constants {
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       title: Text("Save Successfull!"),
-      content: Text("Sales date saved successfully"),
+      content: Text("Sales Invoice Generated."),
       actions: [
         okButton,
       ],

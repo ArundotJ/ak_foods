@@ -7,9 +7,10 @@ final class Invoice {
   final double? total;
   final double? grandTotal;
   final double? totalPaid;
+  final String? name;
 
   Invoice(this.inv_ID, this.invoiceNo, this.invoiceDate, this.customer_ID,
-      this.subTotal, this.total, this.grandTotal, this.totalPaid);
+      this.subTotal, this.total, this.grandTotal, this.totalPaid, this.name);
 
   factory Invoice.fromJson(Map<String, dynamic> json) {
     return Invoice(
@@ -20,6 +21,7 @@ final class Invoice {
         json['SubTotal'],
         json['Total'],
         json['GrandTotal'],
-        json['TotalPaid']);
+        json['TotalPaid'],
+        json['Name']);
   }
 }

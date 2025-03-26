@@ -13,9 +13,9 @@ class DataBaseManager {
     bool isConnected = await mssqlConnection.connect(
       ip: '103.21.58.193',
       port: '1433',
-      databaseName: 'kingbreads1.1_Inventory_DB',
-      username: 'kingbreadsadmin',
-      password: 'kingbreadsadmin@2025',
+      databaseName: 'akfoods_Inventory_DB',
+      username: 'akfoodsarun',
+      password: 'akfoodsadminarun@123',
       timeoutInSeconds: 15,
     );
     return isConnected;

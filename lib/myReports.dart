@@ -33,8 +33,12 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
   }
 
   void _loadOpeningStockDetails() async {
+    // final String data = await DataBaseManager().queryFromSQL(
+    //     "Select * from invoiceinfo where invoicedate='${DateTime.now().getDateOnly()}' and Remarks='${widget.user.name.trim()}'");
+    //
     final String data = await DataBaseManager().queryFromSQL(
-        "Select * from invoiceinfo where invoicedate='${DateTime.now().getDateOnly()}' and Remarks='${widget.user.name.trim()}'");
+        "Select * from invoiceinfo inner join customer on customer.id= invoiceinfo.customer_id where invoicedate= '${DateTime.now().getDateOnly()}' and invoiceinfo.remarks = '${widget.user.name.trim()}'");
+
     final List result = jsonDecode(data);
     List<Invoice> dataList =
         result.map((value) => Invoice.fromJson(value)).toList();
@@ -118,7 +122,7 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
                             style: TextStyle(fontSize: 16),
                           ),
                           Text(
-                            "${invoiceList[index].customer_ID}".trim(),
+                            "${invoiceList[index].name}".trim(),
                             style: TextStyle(fontSize: 16),
                           ),
                           Text(

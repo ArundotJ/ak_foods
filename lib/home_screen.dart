@@ -302,7 +302,7 @@ class _HomeScreen extends State<HomeScreen> {
         ? Text(
             'Balance: $customerBalence',
             style: TextStyle(
-                fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black),
+                fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
             textAlign: TextAlign.start,
           )
         : Center();
