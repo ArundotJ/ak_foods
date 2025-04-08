@@ -20,6 +20,7 @@ class _PaymentScreenState extends State<PaymenyScreen> {
   String selectedItem = 'Select Item';
   Customer? selectedCustomer;
   String balanceAmount = "";
+  double balance = 0.0;
   int transactionID = 0;
   String transactionNumber = "";
   DateTime selectedDate = DateTime.now();
@@ -119,6 +120,7 @@ class _PaymentScreenState extends State<PaymenyScreen> {
           title: Text("Amount: ",
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
           subtitle: TextField(
+            keyboardType: TextInputType.numberWithOptions(),
             controller: totalAmountController,
             decoration: InputDecoration(
               filled: true,
@@ -146,6 +148,13 @@ class _PaymentScreenState extends State<PaymenyScreen> {
                 onPressed: () {
                   setState(() {
                     if (isSaveButtonEnabled) {
+                      if (int.parse(totalAmountController.text) > balance) {
+                        Constants.showAlert(
+                            "Alert!",
+                            "Invalid amount entered. Paid amount should be less that total amount",
+                            context);
+                        return;
+                      }
                       _savePaymentDetails();
                       isNewButtonEnabled = true;
                       isSaveButtonEnabled = false;
@@ -207,16 +216,19 @@ class _PaymentScreenState extends State<PaymenyScreen> {
       if (value > 0) {
         setState(() {
           balanceAmount = "${value.abs()} CR";
+          balance = value;
         });
       } else {
         setState(() {
           balanceAmount = "${value.abs()} DR";
+          balance = value;
         });
       }
       print(value);
     } else {
       setState(() {
         balanceAmount = "0.0";
+        balance = 0;
       });
     }
     final String trNumber = await DataBaseManager().queryFromSQL(

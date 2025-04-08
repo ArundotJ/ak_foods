@@ -1,12 +1,19 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ak_foods/constants.dart';
 import 'package:ak_foods/customerModel.dart';
 import 'package:ak_foods/database_manager.dart';
 import 'package:ak_foods/invoice.dart';
 import 'package:ak_foods/product.dart';
+import 'package:ak_foods/receptDetailsScreen.dart';
 import 'package:ak_foods/user.dart';
 import 'package:flutter/material.dart';
+import 'package:screenshot/screenshot.dart';
+//import 'package:path_provider/path_provider.dart';
+//import 'package:share_plus/share_plus.dart';
 
 class MyReportsScreen extends StatefulWidget {
   final User user;
@@ -24,6 +31,8 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
 
   bool isUpdateNeeded = false;
   double totalValue = 0.0;
+  //Create an instance of ScreenshotController
+  ScreenshotController screenshotController = ScreenshotController();
 
   @override
   void initState() {
@@ -46,6 +55,15 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
       invoiceList = dataList;
       updateTotalValue();
     });
+  }
+
+  void _loadInvoiceInfoDetails() async {
+    final String data = await DataBaseManager().queryFromSQL(
+        "select ProductName,SalesRate,Qty,TotalAmount from Invoice_Product Inner Join InvoiceInfo On InvoiceInfo.Inv_ID=Invoice_Product.InvoiceId Inner Join Product On Product.PID=Invoice_Product.ProductId Where InvoiceId='1'");
+
+    final List result = jsonDecode(data);
+    List<Product> dataList =
+        result.map((value) => Product.fromJson(value, true)).toList();
   }
 
   void updateTotalValue() {
@@ -107,31 +125,74 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: invoiceList.length,
                 itemBuilder: (context, index) {
-                  return Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "${index + 1}",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          Text(
-                            "${invoiceList[index].invoiceNo}".trim(),
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          Text(
-                            "${invoiceList[index].name}".trim(),
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          Text(
-                            "${invoiceList[index].total}",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
-                      ),
-                    ),
+                  return GestureDetector(
+                    child: Card(child: reportCell(index)),
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              insetPadding: EdgeInsets.all(8.0),
+                              title: Text(
+                                "Receipt",
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
+                              content: Container(
+                                width: MediaQuery.of(context).size.width,
+                                child: Screenshot(
+                                  controller: screenshotController,
+                                  child: ReceiptScreen(
+                                    invoiceData: invoiceList[index],
+                                  ),
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    child: Text("Cancel")),
+                                TextButton(
+                                    onPressed: () async {
+                                      await screenshotController
+                                          .capture(
+                                              delay: const Duration(
+                                                  milliseconds: 10))
+                                          .then((Uint8List image) async {
+                                            if (image != null) {
+                                              // final directory =
+                                              //     await getApplicationDocumentsDirectory();
+                                              // final imagePath = await File(
+                                              //         '${directory.path}/image.png')
+                                              //     .create();
+                                              // await imagePath
+                                              //     .writeAsBytes(image);
+
+                                              /// Share Plugin
+                                              ///
+                                              // final result =
+                                              //     await Share.shareXFiles(
+                                              //         [XFile('$imagePath')],
+                                              //         text: 'Receipt');
+
+                                              // if (result.status ==
+                                              //     ShareResultStatus.success) {
+                                              //   print(
+                                              //       'Thank you for sharing the picture!');
+                                              // }
+                                            }
+                                          } as FutureOr<Null> Function(
+                                              Uint8List? value));
+                                    },
+                                    child: Text("Share")),
+                                // TextButton(
+                                //     onPressed: () {}, child: Text("Print"))
+                              ],
+                            );
+                          });
+                    },
                   );
                 },
               ),
@@ -146,5 +207,32 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
             ]),
           ),
         ));
+  }
+
+  Widget reportCell(int index) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "${index + 1}",
+            style: TextStyle(fontSize: 16),
+          ),
+          Text(
+            "${invoiceList[index].invoiceNo}".trim(),
+            style: TextStyle(fontSize: 16),
+          ),
+          Text(
+            "${invoiceList[index].name}".trim(),
+            style: TextStyle(fontSize: 16),
+          ),
+          Text(
+            "${invoiceList[index].total}",
+            style: TextStyle(fontSize: 16),
+          ),
+        ],
+      ),
+    );
   }
 }

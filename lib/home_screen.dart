@@ -135,8 +135,8 @@ class _HomeScreen extends State<HomeScreen> {
   }
 
   void loadCustomerData() async {
-    final String data =
-        await DataBaseManager().queryFromSQL("Select * from customer");
+    final String data = await DataBaseManager().queryFromSQL(
+        "Select * from customer WHERE CIN = '$userName' ORDER BY 1");
     final List result = jsonDecode(data);
     List<Customer> dataList =
         result.map((value) => Customer.fromJson(value)).toList();
@@ -332,7 +332,7 @@ class _HomeScreen extends State<HomeScreen> {
               ),
             )),
             Container(
-              width: 150,
+              width: 180,
               child: Column(
                 children: [
                   Row(
@@ -400,6 +400,13 @@ class _HomeScreen extends State<HomeScreen> {
                             onChanged: (value) => setState(() {
                               if (value.isNotEmpty) {
                                 amountPaid = double.parse(value);
+                                if (amountPaid > totalValue) {
+                                  Constants.showAlert(
+                                      "Alert!",
+                                      "Invalid amount entered. Paid amount should be less that total amount",
+                                      context);
+                                  return;
+                                }
                                 balanceAmount = totalValue - amountPaid;
                               }
                             }),
@@ -614,59 +621,67 @@ class _HomeScreen extends State<HomeScreen> {
 
   void submitButtonTapped() async {
     if (isNetworkOnline) {
-      final String data = await DataBaseManager().queryFromSQL(
-          "SELECT TOP 1 Inv_ID FROM InvoiceInfo ORDER BY Inv_ID DESC");
-      final List result = jsonDecode(data);
-      List<Invoice> invoices =
-          result.map((value) => Invoice.fromJson(value)).toList();
-      int newInvoiceID = 1;
-      if (invoices.length > 0) {
-        Invoice topInvoice = invoices[0];
-        newInvoiceID = topInvoice.inv_ID + 1;
-      }
-      String invoiceNumber = newInvoiceID.toString().padLeft(4, '0');
-      print(invoices);
-      if (selectedCustomer != null) {
-        final String updateData = await DataBaseManager().updateQueryFromSQL(
-            "Insert into InvoiceInfo (Inv_ID, InvoiceNo, InvoiceDate, TaxType, Customer_ID, SalesmanID, SubTotal, CGST, SGST, IGST, GrandTotal,TotalPaid,Balance,Remarks,FreightCharges,OtherCharges,Total,RoundOff) VALUES ('$newInvoiceID','INV-$invoiceNumber','${DateTime.now().getDateOnly()}', 'Inclusive','${selectedCustomer!.id}', '','$totalValue','0','0','0','$totalValue','$amountPaid','$balanceAmount','${widget.user.name}','0.0','0.0','$totalValue','0.00')");
-        for (var i = 0; i < currentStockItems.length; i++) {
-          Product pro = currentStockItems[i];
-          final String data = await DataBaseManager().updateQueryFromSQL(
-              "Update Voucher_OtherDetails1 Set QtyDelivered = QtyDelivered + ${pro.quantityDelivered}, QtyReturned = QtyReturned + ${pro.defaultQuantityReturn} , TotalAmount = ${pro.totalAmount} Where ProductID= ${pro.productId} and VoucherID= ${pro.voicherID}");
-          final double quantity = (pro.quantityDelivered);
-          final String invoiceProduct = await DataBaseManager().updateQueryFromSQL(
-              "Insert into Invoice_Product(InvoiceID, ProductID, BatchNo,Qty, SalesRate, DiscountPer, Discount, CGSTPer, CGSTAmt, SGSTPer, SGSTAmt, IGSTPer, IGSTAmt,MfgDate,ExpiryDate, TotalAmount, PurchaseRate, Margin,MRP,Barcode,SubUnitQty) VALUES ('$newInvoiceID','${pro.productId}','First','$quantity','${pro.rate}','0','0','0','0','0','0','0','0','${DateTime.now().getDateOnly()}','${DateTime.now().getDateOnly()}','${quantity * pro.rate}', '${pro.rate}', '0', '${pro.rate}','0','$quantity')");
-          final String vcDetails2 = await DataBaseManager().updateQueryFromSQL(
-              "Insert into Voucher_OtherDetails2(VoucherID,CustomerID,customerName,ProductID,ProductName,Rate,QtyDelivered,QtyReturned,NetQty,TotalAmount,SalesmanID,SalesmanName) VALUES ('${pro.voicherID}', '${selectedCustomer!.id}','${selectedCustomer!.name.trim()}','${pro.productId}','${pro.productName.trim()}', '${pro.rate}','${pro.quantityDelivered}','${pro.defaultQuantityReturn}','$quantity','${pro.rate * pro.quantityDelivered}','$newInvoiceID', '${widget.user.name.trim()}')");
-          final String tempStock = await DataBaseManager().updateQueryFromSQL(
-              "Update Temp_stock set Qty = Qty - '$quantity', SubUnitQty = SubUnitQty - '$quantity' WHERE ProductID = '${pro.productId}'");
+      if (totalValue > 0) {
+        final String data = await DataBaseManager().queryFromSQL(
+            "SELECT TOP 1 Inv_ID FROM InvoiceInfo ORDER BY Inv_ID DESC");
+        final List result = jsonDecode(data);
+        List<Invoice> invoices =
+            result.map((value) => Invoice.fromJson(value)).toList();
+        int newInvoiceID = 1;
+        if (invoices.length > 0) {
+          Invoice topInvoice = invoices[0];
+          newInvoiceID = topInvoice.inv_ID + 1;
         }
-        if (balanceAmount > 0.0) {
-          final String invoicePayment = await DataBaseManager().updateQueryFromSQL(
-              "Insert into Invoice_Payment(InvoiceID,PaymentMode,TotalPaid,PaymentDate) VALUES ('$newInvoiceID','Credit Terms - 7 days','$balanceAmount','${DateTime.now().getDateOnly()}')");
-        }
+        String invoiceNumber = newInvoiceID.toString().padLeft(4, '0');
+        print(invoices);
         if (selectedCustomer != null) {
-          final String ledgerBook = await DataBaseManager().updateQueryFromSQL(
-              "Insert into LedgerBook(Date, Name, LedgerNo, Label,Debit,Credit,PartyID) VALUES ('${DateTime.now().getDateOnly()}', '${selectedCustomer!.name}','INV-$invoiceNumber','Sales','$totalValue','0.0','${selectedCustomer!.customerID}')");
-          final String customerLedgerBook = await DataBaseManager()
-              .updateQueryFromSQL(
-                  "Insert into CustomerLedgerBook(Date, Name, LedgerNo, Label,Debit,Credit,PartyID) VALUES ('${DateTime.now().getDateOnly()}', '${selectedCustomer!.name}','INV-$invoiceNumber','Sales','$totalValue','0.0','${selectedCustomer!.customerID}')");
+          final String updateData = await DataBaseManager().updateQueryFromSQL(
+              "Insert into InvoiceInfo (Inv_ID, InvoiceNo, InvoiceDate, TaxType, Customer_ID, SalesmanID, SubTotal, CGST, SGST, IGST, GrandTotal,TotalPaid,Balance,Remarks,FreightCharges,OtherCharges,Total,RoundOff) VALUES ('$newInvoiceID','INV-$invoiceNumber','${DateTime.now().getDateOnly()}', 'Inclusive','${selectedCustomer!.id}', '','$totalValue','0','0','0','$totalValue','$amountPaid','$balanceAmount','${widget.user.name}','0.0','0.0','$totalValue','0.00')");
+          for (var i = 0; i < currentStockItems.length; i++) {
+            Product pro = currentStockItems[i];
+            final String data = await DataBaseManager().updateQueryFromSQL(
+                "Update Voucher_OtherDetails1 Set QtyDelivered = QtyDelivered + ${pro.quantityDelivered}, QtyReturned = QtyReturned + ${pro.defaultQuantityReturn} , TotalAmount = ${pro.totalAmount} Where ProductID= ${pro.productId} and VoucherID= ${pro.voicherID}");
+            final double quantity = (pro.quantityDelivered);
+            final String invoiceProduct = await DataBaseManager()
+                .updateQueryFromSQL(
+                    "Insert into Invoice_Product(InvoiceID, ProductID, BatchNo,Qty, SalesRate, DiscountPer, Discount, CGSTPer, CGSTAmt, SGSTPer, SGSTAmt, IGSTPer, IGSTAmt,MfgDate,ExpiryDate, TotalAmount, PurchaseRate, Margin,MRP,Barcode,SubUnitQty) VALUES ('$newInvoiceID','${pro.productId}','First','$quantity','${pro.rate}','0','0','0','0','0','0','0','0','${DateTime.now().getDateOnly()}','${DateTime.now().getDateOnly()}','${quantity * pro.rate}', '${pro.rate}', '0', '${pro.rate}','0','$quantity')");
+            final String vcDetails2 = await DataBaseManager().updateQueryFromSQL(
+                "Insert into Voucher_OtherDetails2(VoucherID,CustomerID,customerName,ProductID,ProductName,Rate,QtyDelivered,QtyReturned,NetQty,TotalAmount,SalesmanID,SalesmanName) VALUES ('${pro.voicherID}', '${selectedCustomer!.id}','${selectedCustomer!.name.trim()}','${pro.productId}','${pro.productName.trim()}', '${pro.rate}','${pro.quantityDelivered}','${pro.defaultQuantityReturn}','$quantity','${pro.rate * pro.quantityDelivered}','$newInvoiceID', '${widget.user.name.trim()}')");
+            final String tempStock = await DataBaseManager().updateQueryFromSQL(
+                "Update Temp_stock set Qty = Qty - '$quantity', SubUnitQty = SubUnitQty - '$quantity' WHERE ProductID = '${pro.productId}'");
+          }
+          if (balanceAmount > 0.0) {
+            final String invoicePayment = await DataBaseManager()
+                .updateQueryFromSQL(
+                    "Insert into Invoice_Payment(InvoiceID,PaymentMode,TotalPaid,PaymentDate) VALUES ('$newInvoiceID','Credit Terms - 7 days','$balanceAmount','${DateTime.now().getDateOnly()}')");
+          }
+          if (selectedCustomer != null) {
+            final String ledgerBook = await DataBaseManager().updateQueryFromSQL(
+                "Insert into LedgerBook(Date, Name, LedgerNo, Label,Debit,Credit,PartyID) VALUES ('${DateTime.now().getDateOnly()}', '${selectedCustomer!.name}','INV-$invoiceNumber','Sales','$totalValue','0.0','${selectedCustomer!.customerID}')");
+            final String customerLedgerBook = await DataBaseManager()
+                .updateQueryFromSQL(
+                    "Insert into CustomerLedgerBook(Date, Name, LedgerNo, Label,Debit,Credit,PartyID) VALUES ('${DateTime.now().getDateOnly()}', '${selectedCustomer!.name}','INV-$invoiceNumber','Sales','$totalValue','0.0','${selectedCustomer!.customerID}')");
+          }
+
+          if (amountPaid > 0.0) {
+            final String ledgerBook = await DataBaseManager().updateQueryFromSQL(
+                "Insert into LedgerBook(Date, Name, LedgerNo, Label,Debit,Credit,PartyID) VALUES ('${DateTime.now().getDateOnly()}', '${selectedPaymentMode == "By Cash" ? "Cash Account" : "Bank Account"}','INV-$invoiceNumber','Payment','0.0','$amountPaid','${selectedCustomer!.customerID}')");
+            final String customerLedgerBook = await DataBaseManager()
+                .updateQueryFromSQL(
+                    "Insert into CustomerLedgerBook(Date, Name, LedgerNo, Label,Debit,Credit,PartyID) VALUES ('${DateTime.now().getDateOnly()}', '${selectedPaymentMode == "By Cash" ? "Cash Account" : "Bank Account"}','INV-$invoiceNumber','Payment','0.0','$amountPaid','${selectedCustomer!.customerID}')");
+
+            final String invoicePayment = await DataBaseManager()
+                .updateQueryFromSQL(
+                    "Insert into Invoice_Payment(InvoiceID,PaymentMode,TotalPaid,PaymentDate) VALUES ('$newInvoiceID','${selectedPaymentMode == "By Cash" ? "By Cash" : "By Bank"}','$amountPaid','${DateTime.now().getDateOnly()}')");
+          }
+
+          Constants.showSaveSuccessAlert(context);
+          resetSelectedData();
+          _loadCurrentStockDetails();
         }
-
-        if (amountPaid > 0.0) {
-          final String ledgerBook = await DataBaseManager().updateQueryFromSQL(
-              "Insert into LedgerBook(Date, Name, LedgerNo, Label,Debit,Credit,PartyID) VALUES ('${DateTime.now().getDateOnly()}', '${selectedPaymentMode == "By Cash" ? "Cash Account" : "Bank Account"}','INV-$invoiceNumber','Payment','0.0','$amountPaid','${selectedCustomer!.customerID}')");
-          final String customerLedgerBook = await DataBaseManager()
-              .updateQueryFromSQL(
-                  "Insert into CustomerLedgerBook(Date, Name, LedgerNo, Label,Debit,Credit,PartyID) VALUES ('${DateTime.now().getDateOnly()}', '${selectedPaymentMode == "By Cash" ? "Cash Account" : "Bank Account"}','INV-$invoiceNumber','Payment','0.0','$amountPaid','${selectedCustomer!.customerID}')");
-
-          final String invoicePayment = await DataBaseManager().updateQueryFromSQL(
-              "Insert into Invoice_Payment(InvoiceID,PaymentMode,TotalPaid,PaymentDate) VALUES ('$newInvoiceID','${selectedPaymentMode == "By Cash" ? "By Cash" : "By Bank"}','$amountPaid','${DateTime.now().getDateOnly()}')");
-        }
-
-        Constants.showSaveSuccessAlert(context);
-        resetSelectedData();
-        _loadCurrentStockDetails();
+      } else {
+        Constants.showAlert("Alert",
+            "Please add the quantities and apply to proceed further", context);
       }
     } else {
       Constants.showAlert("Alert",

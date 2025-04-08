@@ -69,38 +69,45 @@ class _TabbarViewState extends State<TabbarView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: isNetworkOnline == true
-          ? _screens[_currentIndex]
-          : NoInternetScreen(), // Display the selected screen
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index; // Update the selected tab index
-          });
-        },
-        type: BottomNavigationBarType.fixed, // Ensure all tabs are visible
-        selectedItemColor: Colors.red.shade300, // Color of the selected tab
-        unselectedItemColor: Colors.grey, // Color of unselected tabs
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_basket),
-            label: 'Stocks',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.payment),
-            label: 'Payment',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Account',
-          ),
-        ],
+    // ignore: deprecated_member_use
+    return WillPopScope(
+      onWillPop: () async {
+        //todo
+        return Future.value(false);
+      },
+      child: Scaffold(
+        body: isNetworkOnline == true
+            ? _screens[_currentIndex]
+            : NoInternetScreen(), // Display the selected screen
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index; // Update the selected tab index
+            });
+          },
+          type: BottomNavigationBarType.fixed, // Ensure all tabs are visible
+          selectedItemColor: Colors.red.shade300, // Color of the selected tab
+          unselectedItemColor: Colors.grey, // Color of unselected tabs
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_basket),
+              label: 'Stocks',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.payment),
+              label: 'Payment',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Account',
+            ),
+          ],
+        ),
       ),
     );
   }
