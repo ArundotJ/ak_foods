@@ -149,8 +149,9 @@ class _PaymentScreenState extends State<PaymenyScreen> {
                 label: Text('Save'),
                 onPressed: () {
                   setState(() {
-                    if (isSaveButtonEnabled) {
-                      if (int.parse(totalAmountController.text) > balance) {
+                    if (isSaveButtonEnabled &&
+                        totalAmountController.text.isNotEmpty) {
+                      if (int.parse(totalAmountController.text) <= balance) {
                         Constants.showAlert(
                             "Alert!",
                             "Invalid amount entered. Paid amount should be less that total amount",
@@ -160,6 +161,9 @@ class _PaymentScreenState extends State<PaymenyScreen> {
                       _savePaymentDetails();
                       isNewButtonEnabled = true;
                       isSaveButtonEnabled = false;
+                    } else {
+                      Constants.showAlert("Alert!",
+                          "Enter the amount to proceed further.", context);
                     }
                   });
                 }),
