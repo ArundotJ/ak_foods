@@ -408,6 +408,9 @@ class _HomeScreen extends State<HomeScreen> {
                                   return;
                                 }
                                 balanceAmount = totalValue - amountPaid;
+                              } else {
+                                balanceAmount = totalValue;
+                                amountPaid = 0;
                               }
                             }),
                             decoration: InputDecoration(
@@ -620,6 +623,11 @@ class _HomeScreen extends State<HomeScreen> {
   }
 
   void submitButtonTapped() async {
+    if (amountPaid == 0) {
+      Constants.showAlert("Alert!", "Paid amount should not be empty", context);
+      return;
+    }
+
     if (isNetworkOnline) {
       if (totalValue > 0) {
         final String data = await DataBaseManager().queryFromSQL(
