@@ -28,7 +28,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
   void _loadInvoiceInfoDetails() async {
     final String data = await DataBaseManager().queryFromSQL(
-        "select ProductName,SalesRate,Qty,TotalAmount from Invoice_Product Inner Join InvoiceInfo On InvoiceInfo.Inv_ID=Invoice_Product.InvoiceId Inner Join Product On Product.PID=Invoice_Product.ProductId Where InvoiceId='1'");
+        "select ProductName,SalesRate,SubUnitQty,Qty,TotalAmount from Invoice_Product Inner Join InvoiceInfo On InvoiceInfo.Inv_ID=Invoice_Product.InvoiceId Inner Join Product On Product.PID=Invoice_Product.ProductId Where InvoiceId='${widget.invoiceData.inv_ID}'");
 
     final List result = jsonDecode(data);
     List<InvoiceProduct> dataList =
@@ -127,6 +127,10 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                   "Quantity",
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                 ),
+                Text(
+                  "Qty Rtn",
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
                 Text("Total",
                     style:
                         TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
@@ -145,11 +149,15 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('${index + 1}'),
-                      Text(addedProducts[index].name.trim(),
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.normal)),
+                      Container(
+                        width: 50,
+                        child: Text(addedProducts[index].name.trim(),
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.normal)),
+                      ),
                       Text('${addedProducts[index].salesRate}'),
                       Text('${addedProducts[index].quantity}'),
+                      Text('${addedProducts[index].quantityRtn}'),
                       Text('${addedProducts[index].totalAmount}'),
                     ],
                   ),

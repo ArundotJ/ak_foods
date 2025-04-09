@@ -12,8 +12,8 @@ import 'package:ak_foods/receptDetailsScreen.dart';
 import 'package:ak_foods/user.dart';
 import 'package:flutter/material.dart';
 import 'package:screenshot/screenshot.dart';
-//import 'package:path_provider/path_provider.dart';
-//import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class MyReportsScreen extends StatefulWidget {
   final User user;
@@ -133,11 +133,24 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
                           builder: (context) {
                             return AlertDialog(
                               insetPadding: EdgeInsets.all(8.0),
-                              title: Text(
-                                "Receipt",
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                                textAlign: TextAlign.center,
+                              title: Column(
+                                children: [
+                                  Text(
+                                    "AK Foods",
+                                    style: TextStyle(
+                                        fontSize: 26,
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    "Cash Bill",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.normal),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
                               content: Container(
                                 width: MediaQuery.of(context).size.width,
@@ -156,37 +169,95 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
                                     child: Text("Cancel")),
                                 TextButton(
                                     onPressed: () async {
-                                      await screenshotController
+                                      screenshotController
                                           .capture(
-                                              delay: const Duration(
-                                                  milliseconds: 10))
-                                          .then((Uint8List image) async {
-                                            if (image != null) {
-                                              // final directory =
-                                              //     await getApplicationDocumentsDirectory();
-                                              // final imagePath = await File(
-                                              //         '${directory.path}/image.png')
-                                              //     .create();
-                                              // await imagePath
-                                              //     .writeAsBytes(image);
+                                              delay: Duration(milliseconds: 10))
+                                          .then((image) async {
+                                        if (image != null) {
+                                          Uint8List bytes =
+                                              Uint8List.fromList(image);
+                                          final directory =
+                                              await getApplicationDocumentsDirectory();
+                                          final imagePath = await File(
+                                                  '${directory.path}/image.png')
+                                              .create();
+                                          await imagePath.writeAsBytes(bytes);
 
-                                              /// Share Plugin
-                                              ///
-                                              // final result =
-                                              //     await Share.shareXFiles(
-                                              //         [XFile('$imagePath')],
-                                              //         text: 'Receipt');
+                                          /// Share Plugin
+                                          // final result =
+                                          //     await Share.shareXFiles(
+                                          //         [XFile('$imagePath')],
+                                          //         text: 'Receipt');
+                                          // final result =
+                                          //    await Share.
+                                          // if (result.status ==
+                                          //     ShareResultStatus.success) {
+                                          //   print(
+                                          //       'Thank you for sharing the picture!');
+                                          // }
+                                        }
+                                      }).catchError((onError) {
+                                        print(onError);
+                                      });
 
-                                              // if (result.status ==
-                                              //     ShareResultStatus.success) {
-                                              //   print(
-                                              //       'Thank you for sharing the picture!');
-                                              // }
-                                            }
-                                          } as FutureOr<Null> Function(
-                                              Uint8List? value));
+                                      // await screenshotController
+                                      //     .capture(
+                                      //         delay: const Duration(
+                                      //             microseconds: 10))
+                                      //     .then((image) => {
+                                      //       if (image != null) {
+                                      //         String directory = ""
+                                      //         final imagePath = await File(
+                                      //                 '${directory.path}/image.png')
+                                      //             .create();
+                                      //         await imagePath
+                                      //             .writeAsBytes(image);
+
+                                      //         /// Share Plugin
+                                      //         ///
+                                      //         final result =
+                                      //             await Share.shareXFiles(
+                                      //                 [XFile('$imagePath')],
+                                      //                 text: 'Receipt');
+
+                                      //         if (result.status ==
+                                      //             ShareResultStatus.success) {
+                                      //           print(
+                                      //               'Thank you for sharing the picture!');
+                                      //         }
+                                      //       }
+                                      //     });
+
+                                      // await screenshotController
+                                      //     .capture(
+                                      //         delay: const Duration(
+                                      //             milliseconds: 10))
+                                      //     .then((Uint8List image) async {
+                                      //       if (image != null) {
+                                      //         final directory =
+                                      //             await getApplicationDocumentsDirectory();
+                                      //         final imagePath = await File(
+                                      //                 '${directory.path}/image.png')
+                                      //             .create();
+                                      //         await imagePath
+                                      //             .writeAsBytes(image);
+
+                                      //         /// Share Plugin
+                                      //         ///
+                                      //         final result =
+                                      //             await Share.shareXFiles(
+                                      //                 [XFile('$imagePath')],
+                                      //                 text: 'Receipt');
+
+                                      //         if (result.status ==
+                                      //             ShareResultStatus.success) {
+                                      //           print(
+                                      //               'Thank you for sharing the picture!');
+                                      //         }
+                                      //       }
                                     },
                                     child: Text("Share")),
+
                                 // TextButton(
                                 //     onPressed: () {}, child: Text("Print"))
                               ],
