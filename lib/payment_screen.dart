@@ -45,24 +45,26 @@ class _PaymentScreenState extends State<PaymenyScreen> {
         title: Text("Payment"),
         automaticallyImplyLeading: false,
       ),
-      body: Column(
-        children: [
-          DropDownSearchView(
-            items: myCustomers
-                .map((item) => ListItemData(item.name, item.customerID))
-                .toList(),
-            selectedItem: ListItemData("Select Customer", ""),
-            didSelectItem: (item) {
-              selectedCustomer =
-                  myCustomers.firstWhere((p) => p.customerID == item.id);
-              _fetchCutomerAccountDetails();
-            },
-            isDisabled: false,
-            showDefaultValue: selectedCustomer == null,
-          ),
-          SizedBox(height: 20),
-          selectedCustomer == null ? Center() : selectedCustomerDetails(),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            DropDownSearchView(
+              items: myCustomers
+                  .map((item) => ListItemData(item.name, item.customerID))
+                  .toList(),
+              selectedItem: ListItemData("Select Customer", ""),
+              didSelectItem: (item) {
+                selectedCustomer =
+                    myCustomers.firstWhere((p) => p.customerID == item.id);
+                _fetchCutomerAccountDetails();
+              },
+              isDisabled: false,
+              showDefaultValue: selectedCustomer == null,
+            ),
+            SizedBox(height: 20),
+            selectedCustomer == null ? Center() : selectedCustomerDetails(),
+          ],
+        ),
       ),
     );
   }

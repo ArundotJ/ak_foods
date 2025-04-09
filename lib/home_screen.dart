@@ -32,7 +32,7 @@ class _HomeScreen extends State<HomeScreen> {
 
   List<Customer> myCustomers = [];
   double totalValue = 0.0;
-  double amountPaid = 0.0;
+  double? amountPaid = null;
   double balanceAmount = 0.0;
   String? customerBalence = null;
   Customer? selectedCustomer = null;
@@ -117,7 +117,7 @@ class _HomeScreen extends State<HomeScreen> {
     setState(() {
       selectedCustomer = null;
       totalValue = 0.0;
-      amountPaid = 0.0;
+      amountPaid = null;
       balanceAmount = 0.0;
       customerBalence = null;
     });
@@ -400,17 +400,17 @@ class _HomeScreen extends State<HomeScreen> {
                             onChanged: (value) => setState(() {
                               if (value.isNotEmpty) {
                                 amountPaid = double.parse(value);
-                                if (amountPaid > totalValue) {
+                                if (amountPaid! > totalValue) {
                                   Constants.showAlert(
                                       "Alert!",
                                       "Invalid amount entered. Paid amount should be less that total amount",
                                       context);
                                   return;
                                 }
-                                balanceAmount = totalValue - amountPaid;
+                                balanceAmount = totalValue - amountPaid!;
                               } else {
                                 balanceAmount = totalValue;
-                                amountPaid = 0;
+                                amountPaid = null;
                               }
                             }),
                             decoration: InputDecoration(
@@ -623,7 +623,7 @@ class _HomeScreen extends State<HomeScreen> {
   }
 
   void submitButtonTapped() async {
-    if (amountPaid == 0) {
+    if (amountPaid == null) {
       Constants.showAlert("Alert!", "Paid amount should not be empty", context);
       return;
     }
@@ -671,7 +671,7 @@ class _HomeScreen extends State<HomeScreen> {
                     "Insert into CustomerLedgerBook(Date, Name, LedgerNo, Label,Debit,Credit,PartyID) VALUES ('${DateTime.now().getDateOnly()}', '${selectedCustomer!.name}','INV-$invoiceNumber','Sales','$totalValue','0.0','${selectedCustomer!.customerID}')");
           }
 
-          if (amountPaid > 0.0) {
+          if (amountPaid! > 0.0) {
             final String ledgerBook = await DataBaseManager().updateQueryFromSQL(
                 "Insert into LedgerBook(Date, Name, LedgerNo, Label,Debit,Credit,PartyID) VALUES ('${DateTime.now().getDateOnly()}', '${selectedPaymentMode == "By Cash" ? "Cash Account" : "Bank Account"}','INV-$invoiceNumber','Payment','0.0','$amountPaid','${selectedCustomer!.customerID}')");
             final String customerLedgerBook = await DataBaseManager()
