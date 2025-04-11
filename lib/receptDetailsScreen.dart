@@ -28,7 +28,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
   void _loadInvoiceInfoDetails() async {
     final String data = await DataBaseManager().queryFromSQL(
-        "select ProductName,SalesRate,SubUnitQty,Qty,TotalAmount from Invoice_Product Inner Join InvoiceInfo On InvoiceInfo.Inv_ID=Invoice_Product.InvoiceId Inner Join Product On Product.PID=Invoice_Product.ProductId Where InvoiceId='${widget.invoiceData.inv_ID}'");
+        "select ProductName,SalesRate,SubUnitQty,Qty,TotalAmount, Balance, TotalPaid, GrandTotal  from Invoice_Product Inner Join InvoiceInfo On InvoiceInfo.Inv_ID=Invoice_Product.InvoiceId Inner Join Product On Product.PID=Invoice_Product.ProductId Where InvoiceId='${widget.invoiceData.inv_ID}'");
 
     final List result = jsonDecode(data);
     List<InvoiceProduct> dataList =
@@ -40,6 +40,18 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
   double getOverallTotal() {
     return addedProducts.fold(0.0, (sum, product) => sum + product.totalAmount);
+  }
+
+  double getOverallGrandTotal() {
+    return addedProducts.fold(0.0, (sum, product) => sum + product.grandTotal);
+  }
+
+  double getOverallBalance() {
+    return addedProducts.fold(0.0, (sum, product) => sum + product.balance);
+  }
+
+  double getOverallTotalPaid() {
+    return addedProducts.fold(0.0, (sum, product) => sum + product.totalPaid);
   }
 
   @override
@@ -95,9 +107,72 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
           // Overall Total Section
           Align(
             alignment: Alignment.bottomRight,
-            child: Text(
-              "Overall Total: \$${getOverallTotal().toStringAsFixed(2)}",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            child: Container(
+              width: 250,
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Overall Total:",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "\$${getOverallTotal().toStringAsFixed(2)}",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Balance:",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "\$${getOverallBalance().toStringAsFixed(2)}",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Total Paid:",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "\$${getOverallTotalPaid().toStringAsFixed(2)}",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Grand Total:",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "\$${getOverallGrandTotal().toStringAsFixed(2)}",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
